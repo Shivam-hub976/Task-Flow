@@ -1,122 +1,99 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
 
 function App() {
-  const [count, setCount] = useState(0)
+  // 1. STATE ARCHITECTURE
+  const [tasks, setTasks] = useState([
+    { id: 1, text: "Review Sprint 5 Docs", status: "Done" },
+    { id: 2, text: "Build Add Task logic", status: "To Do" },
+  ]);
+  
+  // New state to track the input field
+  const [newTaskText, setNewTaskText] = useState('');
+
+  // 2. ADD TASK LOGIC
+  const handleAddTask = (e) => {
+    e.preventDefault(); // Prevents page reload
+    
+    // Sprint 4 Feedback: Prevent empty fields
+    if (newTaskText.trim() === '') {
+      alert('Task cannot be empty!');
+      return; 
+    }
+
+    const newTask = {
+      id: Date.now(), // Generates a unique ID
+      text: newTaskText,
+      status: 'To Do' // Defaults to the first column
+    };
+
+    // Update state: copy existing tasks and add the new one
+    setTasks([...tasks, newTask]);
+    setNewTaskText(''); // Clear the input field
+  };
+
+  const getTasksByStatus = (status) => {
+    return tasks.filter((task) => task.status === status);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 p-8">
+      <h1 className="text-4xl font-bold text-center text-indigo-900 mb-8">
+        TaskFlow Board
+      </h1>
+
+      {/* ADD TASK FORM */}
+      <form onSubmit={handleAddTask} className="mb-8 flex gap-2 justify-center">
+        <input
+          type="text"
+          value={newTaskText}
+          onChange={(e) => setNewTaskText(e.target.value)}
+          placeholder="What needs to be done?" 
+          className="flex-1 p-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
         <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+          type="submit"
+          className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold transition"
         >
-          Count is {count}
+          Add Task
         </button>
-      </section>
+      </form>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      {/* 3-COLUMN UI ARCHITECTURE (Tailwind Grid restored) */}
+      <div className="grid grid-cols-3 gap-6">
+        
+        {/* Column 1: To Do */}
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h2 className="text-lg font-bold text-gray-700 mb-4">To Do</h2>
+          {getTasksByStatus("To Do").map((task) => (
+            <div key={task.id} className="p-3 mb-3 bg-gray-100 rounded-lg border-l-4 border-blue-500">
+              {task.text}
+            </div>
+          ))}
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {/* Column 2: In Progress */}
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h2 className="text-lg font-bold text-gray-700 mb-4">In Progress</h2>
+          {getTasksByStatus("In Progress").map((task) => (
+            <div key={task.id} className="p-3 mb-3 bg-gray-100 rounded-lg border-l-4 border-yellow-500">
+              {task.text}
+            </div>
+          ))}
+        </div>
+
+        {/* Column 3: Done */}
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h2 className="text-lg font-bold text-gray-700 mb-4">Done</h2>
+          {getTasksByStatus("Done").map((task) => (
+            <div key={task.id} className="p-3 mb-3 bg-gray-100 rounded-lg border-l-4 border-green-500">
+              {task.text}
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;
