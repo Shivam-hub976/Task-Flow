@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
+import TaskCard from "./components/TaskCard";
 
 function App() {
-  // STATE
   const [tasks, setTasks] = useState(() => {
     const savedTasks = localStorage.getItem("taskflow-data");
 
@@ -28,12 +28,11 @@ function App() {
   const [newTaskText, setNewTaskText] = useState("");
   const [newTaskPriority, setNewTaskPriority] = useState("Medium");
 
-  // SAVE TO LOCAL STORAGE
   useEffect(() => {
     localStorage.setItem("taskflow-data", JSON.stringify(tasks));
   }, [tasks]);
 
-  // ADD TASK
+  // Add Task
   const handleAddTask = (e) => {
     e.preventDefault();
 
@@ -54,37 +53,36 @@ function App() {
     setNewTaskPriority("Medium");
   };
 
-  // DELETE TASK
+  // Delete Task
   const handleDeleteTask = (taskId) => {
     setTasks(tasks.filter((task) => task.id !== taskId));
   };
 
-  // MOVE TASK
+  // Move Task
   const handleMoveTask = (taskId, newStatus) => {
     setTasks(
       tasks.map((task) =>
-        task.id === taskId ? { ...task, status: newStatus } : task
+        task.id === taskId
+          ? { ...task, status: newStatus }
+          : task
       )
     );
   };
 
-  // FILTER TASKS
-  const getTasksByStatus = (status) => {
-    return tasks.filter((task) => task.status === status);
+  // Edit Task
+  const handleEditTask = (taskId, newText) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === taskId
+          ? { ...task, text: newText }
+          : task
+      )
+    );
   };
 
-  // PRIORITY COLORS
-  const getPriorityBorder = (priority) => {
-    switch (priority) {
-      case "High":
-        return "border-red-500";
-      case "Medium":
-        return "border-yellow-500";
-      case "Low":
-        return "border-green-500";
-      default:
-        return "border-gray-500";
-    }
+  // Filter Tasks
+  const getTasksByStatus = (status) => {
+    return tasks.filter((task) => task.status === status);
   };
 
   return (
@@ -94,7 +92,7 @@ function App() {
         TaskFlow Board
       </h1>
 
-      {/* ADD TASK FORM */}
+      {/* Add Task Form */}
       <form
         onSubmit={handleAddTask}
         className="flex gap-3 mb-8"
@@ -109,8 +107,10 @@ function App() {
 
         <select
           value={newTaskPriority}
-          onChange={(e) => setNewTaskPriority(e.target.value)}
-          className="p-3 rounded-lg border border-gray-300 shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+          onChange={(e) =>
+            setNewTaskPriority(e.target.value)
+          }
+          className="p-3 rounded-lg border border-gray-300 shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="High">High Priority</option>
           <option value="Medium">Medium Priority</option>
@@ -125,136 +125,57 @@ function App() {
         </button>
       </form>
 
-      {/* BOARD */}
+      {/* Board */}
       <div className="grid grid-cols-3 gap-6">
 
-        {/* TO DO */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">To Do</h2>
+        {/* To Do */}
+        <div className="bg-white rounded-lg shadow p-4">
+          <h2 className="text-lg font-semibold mb-4">
+            To Do
+          </h2>
 
           {getTasksByStatus("To Do").map((task) => (
-            <div
+            <TaskCard
               key={task.id}
-              className={`border-l-4 ${getPriorityBorder(
-                task.priority
-              )} bg-gray-50 p-3 rounded mb-3 flex justify-between items-center`}
-            >
-              <div>
-                <p className="font-medium">{task.text}</p>
-                <span className="text-xs text-gray-500">
-                  {task.priority} Priority
-                </span>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleDeleteTask(task.id)}
-                  className="text-red-500 text-sm hover:text-red-700"
-                >
-                  Delete
-                </button>
-
-                <button
-                  onClick={() =>
-                    handleMoveTask(task.id, "In Progress")
-                  }
-                  className="text-blue-600 text-sm hover:text-blue-800"
-                >
-                  Start →
-                </button>
-              </div>
-            </div>
+              task={task}
+              handleDeleteTask={handleDeleteTask}
+              handleMoveTask={handleMoveTask}
+              handleEditTask={handleEditTask}
+            />
           ))}
         </div>
 
-        {/* IN PROGRESS */}
-        <div className="bg-white p-4 rounded-lg shadow">
+        {/* In Progress */}
+        <div className="bg-white rounded-lg shadow p-4">
           <h2 className="text-lg font-semibold mb-4">
             In Progress
           </h2>
 
           {getTasksByStatus("In Progress").map((task) => (
-            <div
+            <TaskCard
               key={task.id}
-              className={`border-l-4 ${getPriorityBorder(
-                task.priority
-              )} bg-gray-50 p-3 rounded mb-3 flex justify-between items-center`}
-            >
-              <div>
-                <p className="font-medium">{task.text}</p>
-                <span className="text-xs text-gray-500">
-                  {task.priority} Priority
-                </span>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() =>
-                    handleMoveTask(task.id, "To Do")
-                  }
-                  className="text-gray-500 text-sm hover:text-gray-700"
-                >
-                  ← Back
-                </button>
-
-                <button
-                  onClick={() => handleDeleteTask(task.id)}
-                  className="text-red-500 text-sm hover:text-red-700"
-                >
-                  Delete
-                </button>
-
-                <button
-                  onClick={() =>
-                    handleMoveTask(task.id, "Done")
-                  }
-                  className="text-green-600 text-sm hover:text-green-800"
-                >
-                  Finish →
-                </button>
-              </div>
-            </div>
+              task={task}
+              handleDeleteTask={handleDeleteTask}
+              handleMoveTask={handleMoveTask}
+              handleEditTask={handleEditTask}
+            />
           ))}
         </div>
 
-        {/* DONE */}
-        <div className="bg-white p-4 rounded-lg shadow">
+        {/* Done */}
+        <div className="bg-white rounded-lg shadow p-4">
           <h2 className="text-lg font-semibold mb-4">
             Done
           </h2>
 
           {getTasksByStatus("Done").map((task) => (
-            <div
+            <TaskCard
               key={task.id}
-              className={`border-l-4 ${getPriorityBorder(
-                task.priority
-              )} bg-gray-50 p-3 rounded mb-3 flex justify-between items-center`}
-            >
-              <div>
-                <p className="font-medium">{task.text}</p>
-                <span className="text-xs text-gray-500">
-                  {task.priority} Priority
-                </span>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() =>
-                    handleMoveTask(task.id, "In Progress")
-                  }
-                  className="text-gray-500 text-sm hover:text-gray-700"
-                >
-                  ← Revert
-                </button>
-
-                <button
-                  onClick={() => handleDeleteTask(task.id)}
-                  className="text-red-500 text-sm hover:text-red-700"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+              task={task}
+              handleDeleteTask={handleDeleteTask}
+              handleMoveTask={handleMoveTask}
+              handleEditTask={handleEditTask}
+            />
           ))}
         </div>
 
