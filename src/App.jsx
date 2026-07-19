@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import TaskCard from "./components/TaskCard";
 
 function App() {
+  // Load tasks from localStorage
   const [tasks, setTasks] = useState(() => {
     const savedTasks = localStorage.getItem("taskflow-data");
 
@@ -27,7 +28,9 @@ function App() {
 
   const [newTaskText, setNewTaskText] = useState("");
   const [newTaskPriority, setNewTaskPriority] = useState("Medium");
+  const [searchTerm, setSearchTerm] = useState("");
 
+  // Save tasks
   useEffect(() => {
     localStorage.setItem("taskflow-data", JSON.stringify(tasks));
   }, [tasks]);
@@ -49,6 +52,7 @@ function App() {
     };
 
     setTasks([...tasks, newTask]);
+
     setNewTaskText("");
     setNewTaskPriority("Medium");
   };
@@ -81,21 +85,25 @@ function App() {
   };
 
   // Filter Tasks
-  const getTasksByStatus = (status) => {
-    return tasks.filter((task) => task.status === status);
-  };
+ const getTasksByStatus = (status) => {
+  // Trims empty spaces from the start/end of the search term
+  const cleanSearch = searchTerm.trim().toLowerCase();
+  return tasks.filter((task) => 
+    task.status === status && 
+    task.text.toLowerCase().includes(cleanSearch)
+  );
+};
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-
-      <h1 className="text-3xl font-bold mb-6">
+    <div className="min-h-screen bg-gray-100 p-6">
+      <h1 className="text-3xl font-bold mb-6 text-center">
         TaskFlow Board
       </h1>
 
       {/* Add Task Form */}
       <form
         onSubmit={handleAddTask}
-        className="flex gap-3 mb-8"
+        className="flex gap-3 mb-5"
       >
         <input
           type="text"
@@ -107,10 +115,8 @@ function App() {
 
         <select
           value={newTaskPriority}
-          onChange={(e) =>
-            setNewTaskPriority(e.target.value)
-          }
-          className="p-3 rounded-lg border border-gray-300 shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onChange={(e) => setNewTaskPriority(e.target.value)}
+          className="p-3 rounded-lg border border-gray-300 bg-white shadow-sm"
         >
           <option value="High">High Priority</option>
           <option value="Medium">Medium Priority</option>
@@ -119,64 +125,93 @@ function App() {
 
         <button
           type="submit"
-          className="px-5 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           Add Task
         </button>
       </form>
 
-      {/* Board */}
-      <div className="grid grid-cols-3 gap-6">
+      {/* Search Bar */}
+      <div className="mb-6">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="🔍 Search tasks..."
+          className="w-full p-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+      </div>
+
+      {/* Task Board */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         {/* To Do */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold mb-4">
-            To Do
+        <div className="bg-white rounded-xl shadow-md p-4">
+          <h2 className="text-xl font-semibold mb-4">
+            📋 To Do
           </h2>
 
-          {getTasksByStatus("To Do").map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              handleDeleteTask={handleDeleteTask}
-              handleMoveTask={handleMoveTask}
-              handleEditTask={handleEditTask}
-            />
-          ))}
+          {getTasksByStatus("To Do").length === 0 ? (
+            <p className="text-gray-400 text-sm">
+              No tasks found.
+            </p>
+          ) : (
+            getTasksByStatus("To Do").map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                handleDeleteTask={handleDeleteTask}
+                handleMoveTask={handleMoveTask}
+                handleEditTask={handleEditTask}
+              />
+            ))
+          )}
         </div>
 
         {/* In Progress */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold mb-4">
-            In Progress
+        <div className="bg-white rounded-xl shadow-md p-4">
+          <h2 className="text-xl font-semibold mb-4">
+            ⚡ In Progress
           </h2>
 
-          {getTasksByStatus("In Progress").map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              handleDeleteTask={handleDeleteTask}
-              handleMoveTask={handleMoveTask}
-              handleEditTask={handleEditTask}
-            />
-          ))}
+          {getTasksByStatus("In Progress").length === 0 ? (
+            <p className="text-gray-400 text-sm">
+              No tasks found.
+            </p>
+          ) : (
+            getTasksByStatus("In Progress").map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                handleDeleteTask={handleDeleteTask}
+                handleMoveTask={handleMoveTask}
+                handleEditTask={handleEditTask}
+              />
+            ))
+          )}
         </div>
 
         {/* Done */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold mb-4">
-            Done
+        <div className="bg-white rounded-xl shadow-md p-4">
+          <h2 className="text-xl font-semibold mb-4">
+            ✅ Done
           </h2>
 
-          {getTasksByStatus("Done").map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              handleDeleteTask={handleDeleteTask}
-              handleMoveTask={handleMoveTask}
-              handleEditTask={handleEditTask}
-            />
-          ))}
+          {getTasksByStatus("Done").length === 0 ? (
+            <p className="text-gray-400 text-sm">
+              No tasks found.
+            </p>
+          ) : (
+            getTasksByStatus("Done").map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                handleDeleteTask={handleDeleteTask}
+                handleMoveTask={handleMoveTask}
+                handleEditTask={handleEditTask}
+              />
+            ))
+          )}
         </div>
 
       </div>
